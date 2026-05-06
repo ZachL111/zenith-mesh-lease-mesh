@@ -1,68 +1,40 @@
 # zenith-mesh-lease-mesh
 
-`zenith-mesh-lease-mesh` explores distributed systems in SQL. The repository keeps the core rule set compact, then surrounds it with examples that show how the decisions move.
+`zenith-mesh-lease-mesh` is a SQL project in distributed systems. Its focus is to implement an SQL distributed systems project for lease state machine modeling, using transition tables and invalid-transition tests.
 
-## Zenith Mesh Lease Mesh Notes
+## Why It Exists
 
-The quickest review path is the verifier first, then the fixtures, then the operations note. That order makes it easy to see whether the code, data, and explanation still agree.
+I want this repository to be useful as a quick reading exercise: fixtures first, implementation second, verifier last.
 
-## Implementation Notes
+## Zenith Mesh Lease Mesh Review Notes
 
-The interesting part is the boundary between accepted and reviewed scenarios. Extended examples sit near that boundary so future edits can show whether the model became more permissive or more cautious. The SQL project uses sqlite fixtures, views, and assertions to keep query behavior inspectable.
+The first comparison I would make is `quorum health` against `quorum health` because it shows where the rule is most opinionated.
 
-## Why This Exists
+## Features
 
-The repository exists to keep a technical idea small enough to reason about. The implementation avoids external dependencies where possible, then uses fixtures to make changes easy to review.
+- `fixtures/domain_review.csv` adds cases for quorum health and lease drift.
+- `metadata/domain-review.json` records the same cases in structured form.
+- `config/review-profile.json` captures the read order and the two review questions.
+- `examples/zenith-mesh-lease-walkthrough.md` walks through the case spread.
+- The SQL code includes a review path for `quorum health` and `quorum health`.
+- `docs/field-notes.md` explains the strongest and weakest cases.
 
-## Feature Notes
+## Architecture Notes
 
-- Uses fixture data to keep quorum behavior changes visible in code review.
-- Includes extended examples for lease timing, including `surge` and `degraded`.
-- Documents message ordering tradeoffs in `docs/operations.md`.
-- Runs locally with a single verification command and no external credentials.
-- Stores project constants and verification metadata in `metadata/project.json`.
+The repository has two validation layers: the original compact policy fixture and the domain review fixture. They are separate so one can change without hiding failures in the other.
 
-## Example Scenarios
+The SQL checks add a separate view over the domain review fixture.
 
-`examples/extended_cases.csv` adds six named cases. I kept the names plain so failures are easy to read in a terminal: baseline, pressure, surge, degraded, recovery, and boundary.
-
-## Code Tour
-
-- `tests`: verification harness
-- `fixtures`: compact golden scenarios
-- `examples`: expanded scenario set
-- `metadata`: project constants and verification metadata
-- `docs`: operations and extension notes
-- `scripts`: local verification and audit commands
-- `schema.sql`: sqlite schema and view definitions
-
-## Local Setup
-
-Use a normal shell with SQL available on `PATH`. The verifier is written as a PowerShell script because the portfolio was assembled on Windows.
-
-## Try It
+## Usage
 
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File scripts/verify.ps1
 ```
 
-This runs the language-level build or test path against the compact fixture set.
-
 ## Tests
 
-```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File scripts/audit.ps1
-```
+The same command runs the local verification path. The highest-scoring domain case is `stale` at 227, which lands in `ship`. The most cautious case is `baseline` at 153, which lands in `ship`.
 
-The audit command checks repository structure and README constraints before it delegates to the verifier.
+## Limitations And Roadmap
 
-## Boundaries
-
-The examples cover useful edges, not every edge. A larger version would add malformed-input tests, richer reports, and deeper domain parsers.
-
-## Roadmap
-
-- Add a short report command that prints the score breakdown for a single scenario.
-- Add malformed input fixtures so the failure path is as visible as the happy path.
-- Split the scoring constants into a typed configuration object and validate it before use.
-- Add one more distributed systems fixture that focuses on a malformed or borderline input.
+The fixture set is small enough to audit by hand. The next useful expansion is malformed input coverage, not extra surface area.
